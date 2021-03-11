@@ -67,12 +67,6 @@ const PictureRestrict = {
   max: 16,
 };
 
-module.exports = {
-  name: `--generate`,
-  run() {
-  }
-};
-
 const getPictureFileName = (number) => number > 10 ? `item${number}.jpg` : `item0${number}.jpg`;
 
 const generateOffers = (count) => (
