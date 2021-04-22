@@ -32,7 +32,7 @@ const PictureRestrict = {
   MAX: 16,
 };
 
-const getPictureFileName = (number) => number > 10 ? `item${number}.jpg` : `item0${number}.jpg`;
+const getPictureFileName = (number) => `item${number.toString().padStart(2, 0)}.jpg`;
 
 const generateOffers = (count, titles, categories, sentences, comments) => (
   Array(count).fill({}).map(() => ({
