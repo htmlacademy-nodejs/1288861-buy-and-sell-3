@@ -2,133 +2,91 @@
 
 const express = require(`express`);
 const request = require(`supertest`);
+const Sequelize = require(`sequelize`);
 
+const initDB = require(`../lib/init-db`);
 const search = require(`./search`);
 const DataService = require(`../data-service/search`);
 
 const {HttpCode} = require(`../../constants`);
 
-const mockData = [
+const mockCategories = [
+  `Книги`,
+  `Цветы`,
+  `Животные`,
+  `Разное`
+];
+
+const mockOffers = [
   {
-    "id": `ztaNYN`,
-    "category": [
-      `Животные`,
+    "categories": [
       `Книги`,
-      `Разное`,
-      `Посуда`,
-      `Журналы`
+      `Разное`
     ],
-    "description": `Кажется, что это хрупкая вещь. Это настоящая находка для коллекционера! Кому нужен этот новый телефон, если тут такое... При покупке с меня бесплатная доставка в черте города.`,
-    "picture": `item01.jpg`,
-    "title": `Куплю детские санки.`,
-    "type": `offer`,
-    "sum": 34681,
     "comments": [
       {
-        "id": `XIaHpZ`,
-        "text": `Вы что?! В магазине дешевле. А где блок питания?`
-      }
-    ]
-  },
-  {
-    "id": `lJGlf6`,
-    "category": [
-      `Посуда`,
-      `Животные`,
-      `Игры`
-    ],
-    "description": `Пользовались бережно и только по большим праздникам. Если найдёте дешевле — сброшу цену. Товар в отличном состоянии. Кажется, что это хрупкая вещь.`,
-    "picture": `item16.jpg`,
-    "title": `Продам новую приставку Sony Playstation 5.`,
-    "type": `offer`,
-    "sum": 77791,
-    "comments": [
-      {
-        "id": `IUVBd_`,
-        "text": `Оплата наличными или перевод на карту? С чем связана продажа? Почему так дешёво?`
+        "text": `Почему в таком ужасном состоянии?`
       },
       {
-        "id": `aVUXOp`,
-        "text": `С чем связана продажа? Почему так дешёво? Неплохо, но дорого.`
+        "text": `Продаю в связи с переездом. Отрываю от сердца. А где блок питания?`
       }
-    ]
-  },
-  {
-    "id": `jn3QgN`,
-    "category": [],
-    "description": `При покупке с меня бесплатная доставка в черте города. Таких предложений больше нет! Продаю с болью в сердце... Товар в отличном состоянии.`,
+    ],
+    "description": `Таких предложений больше нет! Это настоящая находка для коллекционера! При покупке с меня бесплатная доставка в черте города. Если найдёте дешевле — сброшу цену.`,
     "picture": `item09.jpg`,
-    "title": `Продам новую приставку Sony Playstation 5.`,
-    "type": `offer`,
-    "sum": 29597,
-    "comments": [
-      {
-        "id": `5pU3Pp`,
-        "text": `Неплохо, но дорого.`
-      }
-    ]
+    "title": `Продам новую приставку Sony Playstation 5`,
+    "type": `SALE`,
+    "sum": 79555
   },
   {
-    "id": `sUIPyH`,
-    "category": [
-      `Журналы`,
-      `Игры`,
-      `Разное`,
-      `Книги`
+    "categories": [
+      `Цветы`,
+      `Животные`
     ],
-    "description": `Мой дед не мог её сломать. При покупке с меня бесплатная доставка в черте города. Бонусом отдам все аксессуары. Если товар не понравится — верну всё до последней копейки.`,
-    "picture": `item07.jpg`,
-    "title": `Продам книги Стивена Кинга.`,
-    "type": `offer`,
-    "sum": 45177,
     "comments": [
       {
-        "id": `dVnfXI`,
+        "text": `Неплохо, но дорого. Совсем немного... Оплата наличными или перевод на карту?`
+      },
+      {
+        "text": `С чем связана продажа? Почему так дешёво? Вы что?! В магазине дешевле. Продаю в связи с переездом. Отрываю от сердца.`
+      },
+      {
+        "text": `Неплохо, но дорого. Совсем немного...`
+      },
+      {
         "text": `Вы что?! В магазине дешевле.`
-      },
-      {
-        "id": `C3e8FW`,
-        "text": `Продаю в связи с переездом. Отрываю от сердца. Неплохо, но дорого. А где блок питания?`
-      },
-      {
-        "id": `-lASGI`,
-        "text": `Неплохо, но дорого. А сколько игр в комплекте?`
-      },
-      {
-        "id": `4LpDg8`,
-        "text": `Вы что?! В магазине дешевле. Неплохо, но дорого.`
       }
-    ]
+    ],
+    "description": `При покупке с меня бесплатная доставка в черте города. Даю недельную гарантию. Это настоящая находка для коллекционера! Бонусом отдам все аксессуары.`,
+    "picture": `item02.jpg`,
+    "title": `Продам отличную подборку фильмов на VHS`,
+    "type": `SALE`,
+    "sum": 55460
   },
   {
-    "id": `nlK2Qt`,
-    "category": [
-      `Разное`,
-      `Журналы`,
-      `Посуда`,
-      `Игры`
+    "categories": [
+      `Животные`
     ],
-    "description": `Даю недельную гарантию. Продаю с болью в сердце... Не пытайтесь торговаться. Цену вещам я знаю. Мой дед не мог её сломать.`,
-    "picture": `item05.jpg`,
-    "title": `Продам новую приставку Sony Playstation 5.`,
-    "type": `sale`,
-    "sum": 21125,
     "comments": [
       {
-        "id": `KBu9dV`,
-        "text": `Оплата наличными или перевод на карту?`
-      },
-      {
-        "id": `EzCnOX`,
-        "text": `Продаю в связи с переездом. Отрываю от сердца. А сколько игр в комплекте? Оплата наличными или перевод на карту?`
+        "text": `Оплата наличными или перевод на карту? Продаю в связи с переездом. Отрываю от сердца. С чем связана продажа? Почему так дешёво?`
       }
-    ]
+    ],
+    "description": `Даю недельную гарантию. Продаю с болью в сердце... Товар в отличном состоянии. Если найдёте дешевле — сброшу цену.`,
+    "picture": `item12.jpg`,
+    "title": `Куплю породистого кота`,
+    "type": `SALE`,
+    "sum": 81801
   }
 ];
+const mockDB = new Sequelize(`sqlite::memory:`, {logging: false});
 
 const app = express();
 app.use(express.json());
-search(app, new DataService(mockData));
+
+beforeAll(async () => {
+  await initDB(mockDB, {categories: mockCategories, offers: mockOffers});
+  search(app, new DataService(mockDB));
+});
 
 describe(`API returns offer based on search query`, () => {
 
@@ -138,13 +96,13 @@ describe(`API returns offer based on search query`, () => {
     response = await request(app)
       .get(`/search`)
       .query({
-        query: `Куплю детские санки`
+        query: `Продам новую приставку`
       });
   });
 
   test(`Status code 200`, () => expect(response.statusCode).toBe(HttpCode.OK));
   test(`1 offer found`, () => expect(response.body.length).toBe(1));
-  test(`Offer has correct id`, () => expect(response.body[0].id).toBe(`ztaNYN`));
+  test(`Offer has correct id`, () => expect(response.body[0].title).toBe(`Продам новую приставку Sony Playstation 5`));
 });
 
 test(`API returns code 404 if nothing is found`,

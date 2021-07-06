@@ -11,6 +11,5 @@ module.exports = (service) => (req, res, next) => {
       .send(`Offer with ${offerId} not found`);
   }
 
-  res.locals.offer = offer;
   return next();
 };

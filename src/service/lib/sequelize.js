@@ -1,26 +1,54 @@
 "use strict";
 
-const Sequelize = require(`sequelize`);
-const {DB_NAME, DB_USER, DB_PASSWORD, DB_HOST, DB_PORT} = process.env;
+// const Sequelize = require(`sequelize`);
 
-const somethingIsNotDefined = [DB_NAME, DB_USER, DB_PASSWORD, DB_HOST, DB_PORT].some((it) => it === undefined);
+// const {DB_NAME, DB_USER, DB_PASSWORD, DB_HOST, DB_PORT} = process.env;
 
-if (somethingIsNotDefined) {
-  throw new Error(`One or more environmental variables are not defined`);
-}
+// const somethingIsNotDefined = [DB_NAME, DB_USER, DB_PASSWORD, DB_HOST, DB_PORT].some((it) => it === undefined);
 
-module.exports = new Sequelize(
-    DB_NAME, DB_USER, DB_PASSWORD, {
-      host: DB_HOST,
-      port: DB_PORT,
-      // указываем, с какой СУБД предстоит работать
-      dialect: `postgres`,
-      // настройки пула соединений
-      pool: {
-        max: 5,
-        min: 0,
-        acquire: 10000,
-        idle: 10000
+// if (somethingIsNotDefined) {
+//   throw new Error(`One or more environmental variables are not defined`);
+// }
+
+// module.exports = new Sequelize(
+//     DB_NAME, DB_USER, DB_PASSWORD, {
+//       host: DB_HOST,
+//       port: DB_PORT,
+//       dialect: `postgres`,
+//       pool: {
+//         max: 5,
+//         min: 0,
+//         acquire: 10000,
+//         idle: 10000
+//       }
+//     }
+// );
+
+const getSequelize = () => {
+  const Sequelize = require(`sequelize`);
+  const {DB_NAME, DB_USER, DB_PASSWORD, DB_HOST, DB_PORT} = process.env;
+
+  const somethingIsNotDefined = [DB_NAME, DB_USER, DB_PASSWORD, DB_HOST, DB_PORT].some((it) => it === undefined);
+
+  if (somethingIsNotDefined) {
+    throw new Error(`One or more environmental variables are not defined`);
+  }
+
+  return new Sequelize(
+      DB_NAME, DB_USER, DB_PASSWORD, {
+        host: DB_HOST,
+        port: DB_PORT,
+        // указываем, с какой СУБД предстоит работать
+        dialect: `postgres`,
+        // настройки пула соединений
+        pool: {
+          max: 5,
+          min: 0,
+          acquire: 10000,
+          idle: 10000
+        }
       }
-    }
-);
+  );
+};
+
+module.exports = getSequelize;

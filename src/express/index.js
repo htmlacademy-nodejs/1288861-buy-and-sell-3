@@ -30,3 +30,4 @@ app.set(`views`, path.resolve(__dirname, `templates`));
 app.set(`view engine`, `pug`);
 
 app.listen(process.env.PORT || DEFAULT_PORT);
+console.log(`app: `, app);

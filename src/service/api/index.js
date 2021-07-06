@@ -4,8 +4,8 @@ const {Router} = require(`express`);
 const category = require(`../api/category`);
 const offer = require(`../api/offer`);
 const search = require(`../api/search`);
-
-const getMockData = require(`../lib/get-mock-data`);
+const getSequelize = require(`../lib/sequelize`);
+const defineModels = require(`../models`);
 
 const {
   CategoryService,
@@ -17,11 +17,11 @@ const {
 
 const getRoutes = async () => {
   const router = new Router();
-  const mockData = await getMockData();
+  defineModels(getSequelize());
 
-  category(router, new CategoryService(mockData));
-  search(router, new SearchService(mockData));
-  offer(router, new OfferService(mockData), new CommentService());
+  category(router, new CategoryService(getSequelize()));
+  search(router, new SearchService(getSequelize()));
+  offer(router, new OfferService(getSequelize()), new CommentService(getSequelize()));
 
   return router;
 };
