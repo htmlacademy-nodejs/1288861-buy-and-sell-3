@@ -5,6 +5,7 @@ const Aliases = require(`../models/aliases`);
 class OfferService {
   constructor(sequelize) {
     this._Offer = sequelize.models.Offer;
+    console.log(`this._Offer: `, this._Offer);
     this._Comment = sequelize.models.Comment;
     this._Category = sequelize.models.Category;
   }
@@ -31,8 +32,22 @@ class OfferService {
     return offers.map((item) => item.get());
   }
 
-  findOne(id) {
-    return this._Offer.findByPk(id, {include: [Aliases.CATEGORIES]});
+  findOne(id, needComments) {
+    const include = [Aliases.CATEGORIES];
+    if (needComments) {
+      include.push(Aliases.COMMENTS);
+    }
+    return this._Offer.findByPk(id, {include});
+  }
+
+  async findPage({limit, offset}) {
+    const {count, rows} = await this._Offer.findAndCountAll({
+      limit,
+      offset,
+      include: [Aliases.CATEGORIES],
+      distinct: true
+    });
+    return {count, offers: rows};
   }
 
   async update(id, offer) {

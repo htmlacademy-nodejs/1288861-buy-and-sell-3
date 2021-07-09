@@ -6,7 +6,7 @@ const {HttpCode} = require(`../../constants`);
 
 module.exports = (app, service) => {
   const route = new Router();
-  app.use(`/categories`, route);
+  app.use(`/category`, route);
 
   route.get(`/`, async (req, res) => {
     const {count} = req.query;
