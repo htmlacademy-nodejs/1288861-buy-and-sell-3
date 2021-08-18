@@ -152,7 +152,7 @@ describe(`API returns a list of all offers`, () => {
 
 });
 
-describe(`API returns an offer with given id`, () => {
+describe(`API returns an offer with given title`, () => {
 
   let response;
 
@@ -219,6 +219,34 @@ describe(`API refuses to create an offer if data is invalid`, () => {
     for (const key of Object.keys(newOffer)) {
       const badOffer = {...newOffer};
       delete badOffer[key];
+      await request(app)
+        .post(`/offers`)
+        .send(badOffer)
+        .expect(HttpCode.BAD_REQUEST);
+    }
+  });
+
+  test(`When field type is wrong response code is 400`, async () => {
+    const badOffers = [
+      {...newOffer, sum: true},
+      {...newOffer, picture: 12345},
+      {...newOffer, categories: `Котики`}
+    ];
+    for (const badOffer of badOffers) {
+      await request(app)
+        .post(`/offers`)
+        .send(badOffer)
+        .expect(HttpCode.BAD_REQUEST);
+    }
+  });
+
+  test(`When field value is wrong response code is 400`, async () => {
+    const badOffers = [
+      {...newOffer, sum: -1},
+      {...newOffer, title: `too short`},
+      {...newOffer, categories: []}
+    ];
+    for (const badOffer of badOffers) {
       await request(app)
         .post(`/offers`)
         .send(badOffer)
@@ -357,7 +385,6 @@ describe(`API creates a comment if data is valid`, () => {
       .post(`/offers/3/comments`)
       .send(newComment);
   });
-
 
   test(`Status code 201`, () => expect(response.statusCode).toBe(HttpCode.CREATED));
 

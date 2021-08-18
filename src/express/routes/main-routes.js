@@ -24,7 +24,7 @@ mainRouter.get(`/`, async (req, res) => {
 
   const totalPages = Math.ceil(count / OFFERS_PER_PAGE);
 
-  res.render(`main`, {offers, categories, page, totalPages});
+  res.render(`main`, {offers, page, totalPages, categories});
 });
 
 mainRouter.get(`/register`, (req, res) => res.render(`sign-up`));
