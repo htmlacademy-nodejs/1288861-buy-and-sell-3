@@ -83,12 +83,12 @@ offersRouter.get(`/:id`, async (req, res) => {
   const {id} = req.params;
   const {error} = req.query;
   const offer = await api.getOffer(id, true);
+  console.log(offer.categories);
   res.render(`offers/ticket`, {offer, id, error});
 });
 
 offersRouter.post(`/:id/comments`, async (req, res) => {
   const {id} = req.params;
-  console.log(req.body);
   const {comment} = req.body;
 
   try {

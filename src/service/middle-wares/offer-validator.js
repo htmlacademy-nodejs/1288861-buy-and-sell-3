@@ -5,13 +5,18 @@ const {HttpCode} = require(`../../constants`);
 
 const schema = Joi.object({
   categories: Joi.array().items(
-      Joi.number().integer().positive()
+      Joi.number().integer().positive().messages({
+        'number.base': `"categories" is required`
+      })
   ).min(1).required(),
   title: Joi.string().min(10).max(100).required(),
   description: Joi.string().min(50).max(1000).required(),
-  picture: Joi.string().required(),
+  picture: Joi.string().required().messages({
+    'string.empty': `no "image" received or invalid file type`
+  }),
   type: Joi.any().valid(`OFFER`, `SALE`).required(),
-  sum: Joi.number().integer().greater(100).required()
+  sum: Joi.number().integer().greater(100).required(),
+  userId: Joi.number().integer().positive().required()
 });
 
 module.exports = (req, res, next) => {

@@ -4,6 +4,7 @@ const {Router} = require(`express`);
 
 const mainRouter = new Router();
 const api = require(`../api`).getAPI();
+const upload = require(`../middle-wares/upload`);
 
 const OFFERS_PER_PAGE = 8;
 
@@ -25,6 +26,28 @@ mainRouter.get(`/`, async (req, res) => {
   const totalPages = Math.ceil(count / OFFERS_PER_PAGE);
 
   res.render(`main`, {offers, page, totalPages, categories});
+});
+
+mainRouter.get(`/register`, (req, res) => {
+  const {error} = req.query;
+  res.render(`sign-up`, {error});
+});
+
+mainRouter.post(`/register`, upload.single(`avatar`), async (req, res) => {
+  const {body, file} = req;
+  const userData = {
+    avatar: file ? file.filename : ``,
+    name: body[`user-name`],
+    email: body[`user-email`],
+    password: body[`user-password`],
+    passwordRepeated: body[`user-password-again`]
+  };
+  try {
+    await api.createUser(userData);
+    res.redirect(`/login`);
+  } catch (error) {
+    res.redirect(`/register?error=${encodeURIComponent(error.response.data)}`);
+  }
 });
 
 mainRouter.get(`/register`, (req, res) => res.render(`sign-up`));
