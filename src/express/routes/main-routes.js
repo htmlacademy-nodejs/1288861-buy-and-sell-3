@@ -9,12 +9,12 @@ const upload = require(`../middle-wares/upload`);
 const OFFERS_PER_PAGE = 8;
 
 mainRouter.get(`/`, async (req, res) => {
+  const {user} = req.session;
   let {page = 1} = req.query;
   page = +page;
-
   const limit = OFFERS_PER_PAGE;
-
   const offset = (page - 1) * OFFERS_PER_PAGE;
+
   const [
     {count, offers},
     categories
@@ -22,15 +22,13 @@ mainRouter.get(`/`, async (req, res) => {
     api.getOffers({limit, offset}),
     api.getCategories(true)
   ]);
-
   const totalPages = Math.ceil(count / OFFERS_PER_PAGE);
-
-  res.render(`main`, {offers, page, totalPages, categories});
+  res.render(`main`, {offers, page, totalPages, categories, user});
 });
 
 mainRouter.get(`/register`, (req, res) => {
-  const {error} = req.query;
-  res.render(`sign-up`, {error});
+  const {user} = req.session;
+  res.render(`sign-up`, {user});
 });
 
 mainRouter.post(`/register`, upload.single(`avatar`), async (req, res) => {
@@ -45,25 +43,49 @@ mainRouter.post(`/register`, upload.single(`avatar`), async (req, res) => {
   try {
     await api.createUser(userData);
     res.redirect(`/login`);
-  } catch (error) {
-    res.redirect(`/register?error=${encodeURIComponent(error.response.data)}`);
+  } catch (errors) {
+    const errorMessages = errors.response.data.split(`\n`);
+    const {user} = req.session;
+    res.render(`sign-up`, {errorMessages, user});
   }
 });
 
-mainRouter.get(`/register`, (req, res) => res.render(`sign-up`));
-mainRouter.get(`/login`, (req, res) => res.render(`login`));
+mainRouter.get(`/login`, (req, res) => {
+  const {user} = req.session;
+  res.render(`login`, {user});
+});
+
+mainRouter.post(`/login`, async (req, res) => {
+  try {
+    const user = await api.auth(req.body[`user-email`], req.body[`user-password`]);
+    req.session.user = user;
+    res.redirect(`/`);
+  } catch (errors) {
+    const errorMessages = errors.response.data.split(`\n`);
+    const {user} = req.session;
+    res.render(`login`, {user, errorMessages});
+  }
+});
+
+mainRouter.get(`/logout`, (req, res) => {
+  delete req.session.user;
+  res.redirect(`/`);
+});
 
 mainRouter.get(`/search`, async (req, res) => {
+  const {user} = req.session;
   try {
-    const {search} = req.query;
-    const results = await api.search(search);
+    const {query} = req.query;
+    const results = await api.search(query);
 
     res.render(`search-result`, {
-      results
+      results,
+      user
     });
   } catch (error) {
     res.render(`search-result`, {
-      results: []
+      results: [],
+      user
     });
   }
 });
